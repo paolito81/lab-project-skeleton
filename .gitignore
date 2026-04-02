@@ -172,3 +172,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Data files
+data/tiny-imagenet-200.zip
+
+# VSCode stuff
+settings.json
+
+# MacOS stuff
+.DS_Store

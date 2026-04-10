@@ -1,4 +1,5 @@
 # main.py
+import os
 import torch
 from models.customnet import CustomNet
 from torch import nn
@@ -7,6 +8,15 @@ from dataset.dataloaders import get_dataloader_train, get_dataloader_val
 from dataset.transforms import get_train_transforms, get_val_transforms
 from train import train
 from eval import validate
+
+
+def maybe_mount_drive():
+    try:
+        from google.colab import drive  # type: ignore
+    except ImportError:
+        return
+
+    drive.mount("/content/drive", force_remount=False)
 
 
 def main():
@@ -18,7 +28,16 @@ def main():
     momentum = 0.9
     num_epochs = 10
 
-    reorganize_tiny_imagenet_val()
+    maybe_mount_drive()
+
+    dataset_root = os.environ.get(
+        "DATASET_ROOT",
+        "tiny-imagenet/tiny-imagenet-200",
+    )
+
+    print(f"Using dataset from: {dataset_root}")
+
+    reorganize_tiny_imagenet_val(dataset_root)
 
     train_tf = get_train_transforms(
         img_size=224, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
@@ -28,8 +47,12 @@ def main():
         img_size=224, mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
     )
 
-    train_loader = get_dataloader_train(train_tf, batch_size=batch_size)
-    eval_loader = get_dataloader_val(eval_tf, batch_size=batch_size)
+    train_loader = get_dataloader_train(
+        train_tf, dataset_root=dataset_root, batch_size=batch_size
+    )
+    eval_loader = get_dataloader_val(
+        eval_tf, dataset_root=dataset_root, batch_size=batch_size
+    )
 
     model = CustomNet().to(device)
     criterion = nn.CrossEntropyLoss()

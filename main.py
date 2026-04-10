@@ -10,15 +10,6 @@ from train import train
 from eval import validate
 
 
-def maybe_mount_drive():
-    try:
-        from google.colab import drive  # type: ignore
-    except ImportError:
-        return
-
-    drive.mount("/content/drive", force_remount=False)
-
-
 def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
@@ -27,8 +18,6 @@ def main():
     lr = 0.001
     momentum = 0.9
     num_epochs = 10
-
-    maybe_mount_drive()
 
     dataset_root = os.environ.get(
         "DATASET_ROOT",
